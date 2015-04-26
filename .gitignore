@@ -1,0 +1,6 @@
+logs
+www/wire
+www/site/assets
+www/site/styles/*.css
+www/site/styles/*.css.map
+www/site/styles/bootstrap
