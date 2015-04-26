@@ -8,5 +8,5 @@
 
 $content = $page->summary; 
 
-$content .= renderNavTree($page, 2); 
+$content .= renderNavTree($page, 1); 
 

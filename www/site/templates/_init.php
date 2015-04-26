@@ -29,7 +29,7 @@ $homepage = $pages->get('/');
 
 // Include shared functions (if any)
 include_once("./_func.php"); 
-include_once("./functions.php"); 
+include_once("./_functions.php"); 
 
 
 // What happens after this?

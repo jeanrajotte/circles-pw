@@ -34,6 +34,17 @@ function attendeeForm( $page, $is_new=false ) {
 	$res .= '<td colspan="3">' . '<input type="email" name="email" id="email" size="40"'.$val.' />' . '</td>';
 	$res .= '</tr>';
 
+	$search_url = $page->parent('template.name=event')->url . 'attendees/search?email=' . urlencode($page->email);
+
+	$res .= '<tr>';
+	$res .= '<td>' . '<label for="search"><em>Find all entries with this email</em></label>' . '</td>';
+	$res .= '<td colspan="3">' . '<a class="btn btn-sm btn-primary" href="'.$search_url.'" >Search</a>' . '</td>';
+	$res .= '</tr>';
+
+	$content .= '<form action="attendees/search">';
+	$content .= '<label>Enter the email address you used when you registered  <input type="email" name="email"></label> ';
+	$content .= '<button class="btn btn-warning">Search</button> ';
+
 	$val = $is_new ? '' : ' value="' .$page->title. '"';
 
 	$res .= '<tr>';
@@ -69,7 +80,7 @@ function attendeeForm( $page, $is_new=false ) {
 	$res .= '</tr>';
 
 	$res .= '</table>';
-	$res .= '<div><button class="btn btn-success">Register</div>';
+	$res .= '<div><button class="btn btn-success">'.($is_new ? 'Register' : 'Save').'</div>';
 	$res .= '</form>';
 
 
