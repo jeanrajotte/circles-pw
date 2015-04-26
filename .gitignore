@@ -1,6 +1,6 @@
 logs
 www/wire
 www/site/assets
-www/site/styles/*.css
-www/site/styles/*.css.map
-www/site/styles/bootstrap
+www/site/templates/styles/*.css
+www/site/templates/styles/*.css.map
+www/site/templates/styles/bootstrap
