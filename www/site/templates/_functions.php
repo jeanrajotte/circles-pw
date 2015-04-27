@@ -41,10 +41,6 @@ function attendeeForm( $page, $is_new=false ) {
 	$res .= '<td colspan="3">' . '<a class="btn btn-sm btn-primary" href="'.$search_url.'" >Search</a>' . '</td>';
 	$res .= '</tr>';
 
-	$content .= '<form action="attendees/search">';
-	$content .= '<label>Enter the email address you used when you registered  <input type="email" name="email"></label> ';
-	$content .= '<button class="btn btn-warning">Search</button> ';
-
 	$val = $is_new ? '' : ' value="' .$page->title. '"';
 
 	$res .= '<tr>';
