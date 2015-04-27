@@ -23,6 +23,12 @@ if ($page->closed) {
 	$content .= "</div>";
 }
 
+if ($user->isLoggedin()) {
+	$content .= '<div>';
+	$content .= '<a class="btn btn-primary" href="attendees/report">Attendees report</a>';
+	$content .= '</div>';
+}
+
 // If the page has children, then render navigation to them under the body.
 // See the _func.php for the renderNav example function.
 // if($page->hasChildren) {
