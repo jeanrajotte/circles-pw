@@ -149,6 +149,19 @@ function attendeeSave($page, $input, $is_new) {
 	return $p;
 }
 
+function renderNextEvent() {
+	$d = new Datetime();
+	$d->modify('- 3 days');
+	$s = $d->format('Y-m-d');
+	trace($s);
+	$p = wire('pages')->findOne("template.name=event,date_from>$s,sort=date_from");
+	if ($p) {
+		return '<a class="btn btn-primary" href="'.$p->url.'">' .$p->title. '</a>';
+	} else {
+		return '<p class="generous bg-warning">No Next Event right now...</p>';
+	}
+}
+
 $trace_lines = array();
 function trace($s) {
 	global $trace_lines;

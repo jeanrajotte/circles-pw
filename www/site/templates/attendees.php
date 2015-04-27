@@ -18,29 +18,65 @@ function search( ) {
 }
 
 function report() {
-	$amenities = wire('pages')->find('template.name=amenity');
+	$amenities = wire('pages')->find('template.name=amenity, sort=title');
 	$res = '<table class="circles table-striped">';
+	$gtot = array();
+	foreach($amenities as $a) {
+		$cat = $a->category->title;
+		$gtot[ $cat] = 0;		
+	}
+	// trace(print_r($gtot, true));
+	
+	$res .= '<tr>';
+	$res .= '<th>Email</th>';
+	$res .= '<th>Name</th>';
+	
+	foreach($gtot as $cat => $n) {
+		trace( 'cat: ' .$cat);
+		$res .= '<th class="text-right">'. $cat .'</td>';
+	}
+	
+	$res .= '<th class="text-right">Totals</th>';
+	$res .= '</tr>';
 
-	$gtot = 0;
 	foreach(wire('page')->children('sort=email') as $p) {
-		$tot = 0;
+		$tot = array();
+		foreach($gtot as $cat -> $x) {
+			$tot[$cat] = 0;
+		}
+
 		$fld = $p->is_child ? 'price_child' : 'price_adult';
 		foreach($amenities as $a) {
-			if ($p->attendee_amenities->find($a)) {
-				$tot += $a->get($fld);
+			if ($p->attendee_amenities->find($a)->count()) {
+				$cat = $a->category->title;
+				$n = $a->get($fld);
+				$tot[ $cat] = $tot[ $cat] + $n;
+				$gtot[ $cat] = $gtot[ $cat] + $n;
 			}
 		}
-		$gtot += $tot;		
 
+		$t = 0;
 		$res .= '<tr>';
 		$res .= '<td>'.$p->email.'</td>';
 		$res .= '<td>'.'<a href="'.$p->url.'">'.$p->title.'</a>'.'</td>';
-		$res .= '<td class="text-right"><span class="price">'. currency($tot) .'</span>'.'</td>';
+		foreach($gtot as $cat => $x) {
+			trace($cat);
+			$n = $tot[ $cat];
+			$res .= '<td class="text-right"><span class="price">'. currency($n) .'</span>'.'</td>';
+			$t += $n;	
+		}
+		$res .= '<td class="text-right"><span class="price"><b>'. currency($t) .'</b></span>'.'</td>';
 		$res .= '</tr>';
 	}
+
+	$t = 0;
 	$res .= '<tr>';
-	$res .= '<td colspan="2">Total</td>';
-	$res .= '<td class="text-right"><span class="price">'. currency($gtot) .'</span>'.'</td>';
+	$res .= '<td colspan="2"><b>Totals</b></td>';
+	foreach($gtot as $cat => $n) {
+		$res .= '<td class="text-right"><span class="price"><b>'. currency($n) .'</b></span>'.'</td>';
+		$t += $n;	
+	}
+	$res .= '<td class="text-right"><span class="price"><b>'. currency($t) .'</b></span>'.'</td>';
 	$res .= '</tr>';
 
 	$res .= '</table>';

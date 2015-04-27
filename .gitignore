@@ -4,3 +4,4 @@ www/site/assets
 www/site/templates/styles/*.css
 www/site/templates/styles/*.css.map
 www/site/templates/styles/bootstrap
+www/schlep*

@@ -61,16 +61,6 @@ $config->appendTemplateFile = '_main.php';
 /*** INSTALLER CONFIG ********************************************************************/
 
 /**
- * Installer: Database Configuration
- * 
- */
-$config->dbHost = 'localhost';
-$config->dbName = 'circles-pw';
-$config->dbUser = 'circles-pw';
-$config->dbPass = '1entry2circles-pw';
-$config->dbPort = '3306';
-
-/**
  * Installer: User Authentication Salt 
  * 
  * Must be retained if you migrate your site from one server to another
@@ -92,9 +82,28 @@ $config->chmodFile = '0644'; // permission for files created by ProcessWire
 $config->timezone = 'America/New_York';
 
 
-/**
- * Installer: HTTP Hosts Whitelist
- * 
- */
-$config->httpHosts = array('circles-pw.dev', 'www.circles-pw.dev');
+if (preg_match( '/circles\.jejotte\.com/', $_SERVER['HTTP_HOST']) ) {
+	// staging
+	$config->dbHost = 'localhost';
+	$config->dbName = 'jejottec_circles';
+	$config->dbUser = 'jejottec_circles';
+	$config->dbPass = 'w9roDD6_Uqa';
+	$config->dbPort = '3306';
+	// Installer: HTTP Hosts Whitelist
+	$config->httpHosts = array('circles.jejotte.com', 'www.circles.jejotte.com');
+
+} elseif (preg_match( '/circles-pw\.dev/', $_SERVER['HTTP_HOST'])
+		|| ($_SERVER['HTTP_HOST']===$_SERVER['SERVER_ADDR']))
+{	
+	// dev
+	$config->dbHost = 'localhost';
+	$config->dbName = 'circles-pw';
+	$config->dbUser = 'circles-pw';
+	$config->dbPass = '1entry2circles-pw';
+	$config->dbPort = '3306';
+	$config->httpHosts = array('circles-pw.dev', 'www.circles-pw.dev');
+} else {
+	die('No known config.');
+}
+
 
