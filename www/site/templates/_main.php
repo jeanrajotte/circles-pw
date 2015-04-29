@@ -99,7 +99,7 @@
 		Powered by <a href='http://processwire.com'>ProcessWire CMS</a>  
 		<?php 
 
-		trace_show();
+		// trace_show();
 
 		// if($user->isLoggedin()) {
 		// 	// if user is logged in, show a logout link

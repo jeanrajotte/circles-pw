@@ -22,24 +22,29 @@ function attendeeForm( $page, $is_new=false ) {
 	// trace($is_new ? 'NEW' : 'NOT NEW');
 	
 	$c = $is_new ? 'adult' :  ($page->is_child ? 'child' : 'adult');
-	$url = $is_new ? $page->url.'new' : $page->url.'save';
+	$url = $is_new ? $page->url.'create' : $page->url.'save';
 
 	$res .= '<form class="tbl '.$c.'" id="attendee" action="'.$url.'" method="post">';
 	$res .= '<table class="table-striped">';
 
-	$val = $is_new ? '' : ' value="' .$page->email. '"';
+	$val = $is_new 
+		? (wire('input')->get->email
+			? 'value="' . wire('sanitizer')->email( wire('input')->get->email) .'"'
+			: '') 
+		: ' value="' .$page->email. '"';
+	$search_url = $page->parent('template.name=event')->url . 'attendees/search?email=' . urlencode($page->email);
+	$add_url = $page->parent('template.name=event')->url . 'attendees/add?email=' . urlencode($page->email);
 
 	$res .= '<tr>';
 	$res .= '<td>' . '<label for="email">Your Email<em>to retrieve this info if you want to change it</em></label>' . '</td>';
-	$res .= '<td colspan="3">' . '<input type="email" name="email" id="email" size="40"'.$val.' />' . '</td>';
+	$res .= '<td colspan="3">' . '<p><input type="email" name="email" id="email" size="40"'.$val.' /></p>' 
+		. '<p><a class="btn btn-xs btn-primary" href="'.$search_url.'" >Find all entries</a>'
+		. ' <em> with this email</em></p>'
+		. '<p><a class="btn btn-xs btn-primary" href="'.$add_url.'" >Add</a>'
+		. ' <em>another person to this email</em></p>'
+		. '</td>';
 	$res .= '</tr>';
 
-	$search_url = $page->parent('template.name=event')->url . 'attendees/search?email=' . urlencode($page->email);
-
-	$res .= '<tr>';
-	$res .= '<td>' . '<label for="search"><em>Find all entries with this email</em></label>' . '</td>';
-	$res .= '<td colspan="3">' . '<a class="btn btn-sm btn-primary" href="'.$search_url.'" >Search</a>' . '</td>';
-	$res .= '</tr>';
 
 	$val = $is_new ? '' : ' value="' .$page->title. '"';
 

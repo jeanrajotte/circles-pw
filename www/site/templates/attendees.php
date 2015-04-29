@@ -88,7 +88,7 @@ if ($input->urlSegment1 === 'add') {
 	$content = attendeeForm( $page, true );
 	$title = $page->title = 'Add New Attendee';
 
-} elseif ($input->urlSegment1 === 'new') {
+} elseif ($input->urlSegment1 === 'create') {
 	$new_page = attendeeSave( $page, $input, true);
 	$session->redirect($new_page->url, false);
 

@@ -6,9 +6,10 @@ if ($input->urlSegment1 === 'save') {
 	attendeeSave( $page, $input);
 	$session->redirect($page->url, false);
 }
-$content = '<p class="generous bg-success">'
-	.$page->title
-	.' is registered now. You can change your info and press Save if you please.</p>'; 
+$content = '<div class="generous bg-success">'
+	. '<b>' .$page->title. '</b>'
+	. ' is registered. Change the info for <b>' .$page->title. '</b> and press Save.'
+	. '</div>'; 
 $content .= attendeeForm( $page );
 
 // if the rootParent (section) page has more than 1 child, then render 
