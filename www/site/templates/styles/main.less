@@ -14,7 +14,6 @@
  */
 
 @import 'bootstrap/less/bootstrap.less';
-
 * {
   box-sizing: border-box;
 }
@@ -30,8 +29,8 @@ td,
 input[type=text],
 textarea {
   /*font-family: 'Quattrocento', serif;
-	font-size: 105%; 
-	line-height: 1.8em;*/
+  font-size: 105%; 
+  line-height: 1.8em;*/
   
   color: #444;
 }
@@ -332,6 +331,10 @@ table.circles th {
   vertical-align: top;
 }
 
+form table {
+  width: 100%;
+}
+
 .price {
   display: inline-block;
   width: 5em;
@@ -357,10 +360,57 @@ form.adult .adult,
 form.child .child {
   font-weight: bold;
 }
+
+.required {
+  border-left: 5px double blue;
+  border-right: 5px double blue;
+  label:after {
+    content: '\A [Required]';
+    white-space: pre-wrap;
+  }
+}
+
 .trace {
-	.well();
+  .well();
 }
 
 .generous {
   padding: 12px;
+}
+
+.b {
+  font-weight: bold;
+}
+
+.tot {
+  border-top: double 3px #333;
+}
+
+a {
+  border-bottom: none;
+  text-decoration: underline;
+  &:hover {
+    color: blue;
+  }
+  &.btn {
+    text-decoration: none;
+    &:hover {
+      color: white;
+    } 
+  }
+}
+
+@media print {
+  .topnav,
+  .search,
+  .breadcrumbs,
+  #sidebar {
+    display: none;
+  }
+  a {
+    border-bottom: none;
+    &[href]:after {
+      content: "" !important;
+    }
+  }
 }

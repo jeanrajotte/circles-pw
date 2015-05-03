@@ -17,7 +17,7 @@ if ($page->closed) {
 	$content .= "<h3>Already registered</h3>";
 	$content .= "<div>";
 	$content .= '<form action="attendees/search">';
-	$content .= '<label>Enter the email address you used when you registered  <input type="email" name="email"></label> ';
+	$content .= '<label>Enter some text found in the email address you used when you registered  <input type="text" name="email"></label> ';
 	$content .= '<button class="btn btn-warning">Search</button> ';
 	$content .= "</form>";
 	$content .= "</div>";
@@ -25,7 +25,7 @@ if ($page->closed) {
 
 if ($user->isLoggedin()) {
 	$content .= '<div>';
-	$content .= '<a class="btn btn-primary" href="attendees/report">Attendees report</a>';
+	$content .= '<a class="btn btn-primary" href="attendees/reports">Attendees reports</a>';
 	$content .= '</div>';
 }
 
