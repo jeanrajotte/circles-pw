@@ -24,7 +24,7 @@ function attendeeForm( $page, $is_new=false ) {
   $c = $is_new ? 'adult' :  ($page->is_child ? 'child' : 'adult');
   $url = $is_new ? $page->url.'create' : $page->url.'save';
 
-  $res .= '<div class="well required">Fields marked like this paragraph are [required]. You will not be able to save this form with values in them.</div>';
+  $res .= '<div class="well required">Fields marked like this paragraph are <b>[required]</b>. You will not be able to save this form with values in them.</div>';
 
   $res .= '<form class="tbl '.$c.'" id="attendee" action="'.$url.'" method="post">';
   $res .= '<table class="table-striped">';

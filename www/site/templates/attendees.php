@@ -13,12 +13,12 @@ function search( ) {
 	if ($found->count()) {
 		$out = '';
 		foreach($found as $item) {
-			$out .= "<tr>";
-			$out .= "<td><a href='$item->url'>$item->title</a></td>";
-			$out .= "<td><i>($item->email)</i></td>";
-			$out .= "</tr>";
+			$out .= "<a class='tr' href='$item->url'>";
+			$out .= "<span class='td'>$item->title</span>";
+			$out .= "<span class='td'>&bullet; <i>$item->email</i></span>";
+			$out .= "</a>";
 		}
-		return "<table class=\"circles\">$out</table>";
+		return "<div class=\"table circles\">$out</div>";
 	} else {
 		return '<p class="well text-danger">Nothing found for ' .$email. '</p>';
 	}
