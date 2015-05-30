@@ -1,6 +1,7 @@
 logs
 www/wire
 www/site/assets
+www/site/modules/BatchChildEditor
 www/site/templates/styles/*.css
 www/site/templates/styles/*.css.map
 www/site/templates/styles/bootstrap

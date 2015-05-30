@@ -1,0 +1,212 @@
+<?php
+
+/**
+ * ProcessWire 'Circles'  module
+ *
+ * http://processwire.com
+ *
+ */
+
+class Circles extends WireData implements Module {
+
+	/**
+	 * getModuleInfo is a module required by all modules to tell ProcessWire about them
+	 *
+	 * @return array
+	 *
+	 */
+	public static function getModuleInfo() {
+
+		return array(
+
+			// The module'ss title, typically a little more descriptive than the class name
+			'title' => 'Circles -- a virtual stewart', 
+
+			// version number 
+			'version' => 1, 
+
+			// summary is brief description of what this module is
+			'summary' => 'Install hooks.',
+			
+			// Optional URL to more information about the module
+			'href' => 'http://processwire.com',
+
+			// singular=true: indicates that only one instance of the module is allowed.
+			// This is usually what you want for modules that attach hooks. 
+			'singular' => true, 
+
+			// autoload=true: indicates the module should be started with ProcessWire.
+			// This is necessary for any modules that attach runtime hooks, otherwise those
+			// hooks won't get attached unless some other code calls the module on it's own.
+			// Note that autoload modules are almost always also 'singular' (seen above).
+			'autoload' => true, 
+		
+			// Optional font-awesome icon name, minus the 'fa-' part
+			'icon' => 'smile-o', 
+			);
+	}
+
+	/**
+	 * Initialize the module
+	 *
+	 * ProcessWire calls this when the module is loaded. For 'autoload' modules, this will be called
+	 * when ProcessWire's API is ready. As a result, this is a good place to attach hooks. 
+	 *
+	 */
+	public function init() {
+
+		// add hooks after the $pages->save
+		$this->pages->addHookAfter('save', $this, 'ensure_event_containers'); 
+		$this->pages->addHookAfter('save', $this, 'ensure_event_amenities'); 
+
+		// // add a hook after each page is rendered and modify the output
+		// $this->addHookAfter('Page::render', $this, 'example2'); 
+
+		// // add a 'hello' method to every page that returns "Hello World"
+		// // use "echo $page->hello();" in your template file to display output
+		// $this->addHook('Page::hello', $this, 'example3'); 
+
+		// // add a 'hello_world' property to every page that returns "Hello [user]"
+		// // use "echo $page->hello_world;" in your template file to display output
+		// $this->addHookProperty('Page::hello_world', $this, 'example4'); 
+	}
+
+	// ensure event amenities exist.
+	// preserve existing ones so their ID is stable if there are already subscribing pages
+	function ensure_event_containers($event) {
+		$p = $event->arguments('page');
+		if ($p->template->name !== 'event') {
+			return;
+		}
+		// ensure amenity container
+		if ($p->children('template.name=amenities')->count() === 0) {
+			$np = new Page();
+			$np->template = 'amenities';
+			$np->parent = $p;
+			$np->title = 'Amenities';
+			$np->save();
+			$this->message('Created amenities collection');
+		}
+		// ensure attendee container
+		if ($p->children('template.name=attendees')->count() === 0) {
+			$np = new Page();
+			$np->template = 'attendees';
+			$np->parent = $p;
+			$np->title = 'Attendees';
+			$np->save();
+			$this->message('Created attendees collection');
+		}
+
+	}
+
+	// ensure event amenities exist.
+	// preserve existing ones so their ID is stable if there are already subscribing pages
+	function ensure_event_amenities($event) {
+		$p = $event->arguments('page');
+		// $this->message($p->template->name);
+		if ($p->template->name !== 'event') {
+			return;
+		}
+		$d0 = new DateTime();
+		$d0->setTimestamp( $p->getUnformatted( "date_from"));
+		$d_from = $d0->format("Y-m-d");
+		$d9 = new DateTime();
+		$d9->setTimestamp( $p->getUnformatted( "date_to"));
+		$d_to = $d9->format("Y-m-d");
+
+		// gather desired
+		$matrix = array();
+		while($d_from <= $d_to){
+			foreach(wire('pages')->find('parent=/lookups/amenities, template.name=amenity, closed=0, sort=sort') as $a) {
+				$matrix[ wire('sanitizer')->name($d_from . '-' . $a->name) ] = array( 
+					'date' => $d0->getTimestamp(),		// not the object!
+					'a' => $a
+				);
+			}
+			$d0->modify('+1 day');
+			$d_from = $d0->format("Y-m-d");
+		}
+		
+		$coll = $p->child('template.name=amenities');
+		// $this->message($coll->title);
+		
+		// remove those no longer desired
+		$del = array();
+		foreach($coll->children() as $a) {
+			if (array_key_exists($a->name, $matrix)) {
+				continue;
+			}
+			$del[] = $a->title;
+			$a->remove();
+		}
+		$n = count($del);
+		$this->message("Removed {$n} obsolete amenities.");
+		
+		// add those that aren't there.
+		$add = array();
+		foreach($matrix as $name => $p) {
+			if ($coll->children("name={$name}")->count()) {
+				continue;
+			}
+			$np = new Page();
+			$np->template = 'event_amenity';
+			$np->parent = $coll;
+			$np->name = $name;
+			$d = new DateTime();
+			$d->setTimestamp( $p['date']);
+			$np->title = $d->format('D, Y-M-d') . ' - ' . $p['a']->title;
+			$np->date = $d->getTimestamp();
+			$np->amenity = $p['a'];
+			$add[] = $np->title;
+			// $this->message('Added: ' . $np->name);
+			$np->save();
+		}
+		$n = count($add);
+		$this->message("Added {$n} new amenities.");
+
+	} 
+
+
+
+	// /**
+	//  * Example1 hooks into the pages->save method and displays a notice every time a page is saved
+	//  *
+	//  */
+	// public function example1($event) {
+	// 	$page = $event->arguments[0]; 
+	// 	$this->message("Hello World! You saved {$page->path}."); 
+	// }
+
+
+	// /**
+	//  * Example2 hooks into every page after it's rendered and adds "Hello World" text at the bottom
+	//  *
+	//  */
+	// public function example2($event) {
+
+	// 	$page = $event->object; 
+
+	// 	// don't add this to the admin pages
+	// 	if($page->template == 'admin') return;
+
+	// 	// add a "Hello World" paragraph right before the closing body tag
+	// 	$event->return = str_replace("</body>", "<p>Hello World!</p></body>", $event->return); 
+	// }
+
+	// /**
+	//  * Example3 adds a 'hello' method (not property) to every page that simply returns "Hello World"
+	//  *
+	//  */
+	// public function example3($event) {
+	// 	$event->return = "Hello World";
+	// }
+
+	// /**
+	//  * Example 4 adds a 'hello_world' property (not method) to every page that returns "Hello [user]"
+	//  *
+	//  */
+	// public function example4($event) {
+	// 	$event->return = "Hello " . $this->user->name; 
+	// }
+	
+}

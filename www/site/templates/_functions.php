@@ -19,6 +19,8 @@ function attendeeForm( $page, $is_new=false ) {
     $page->of(true);
   }
 
+  $event = $page->parent('template.name=event');
+
   // trace($is_new ? 'NEW' : 'NOT NEW');
   
   $c = $is_new ? 'adult' :  ($page->is_child ? 'child' : 'adult');
@@ -27,15 +29,17 @@ function attendeeForm( $page, $is_new=false ) {
   $res .= '<div class="well required">Fields marked like this paragraph are <b>[required]</b>. You will not be able to save this form with values in them.</div>';
 
   $res .= '<form class="tbl '.$c.'" id="attendee" action="'.$url.'" method="post">';
-  $res .= '<table class="table-striped">';
+  $res .= '<table>';
+
+  ///////// EMAIL
 
   $val = $is_new 
     ? (wire('input')->get->email
       ? 'value="' . wire('sanitizer')->email( wire('input')->get->email) .'"'
       : '') 
     : ' value="' .$page->email. '"';
-  $search_url = $page->parent('template.name=event')->url . 'attendees/search?email=' . urlencode($page->email);
-  $add_url = $page->parent('template.name=event')->url . 'attendees/add?email=' . urlencode($page->email);
+  $search_url = $event->url . 'attendees/search?email=' . urlencode($page->email);
+  $add_url = $event->url . 'attendees/add?email=' . urlencode($page->email);
 
   $res .= '<tr class="required">';
   $res .= '<td>' . '<label for="email"><span class="fname">Your Email</span><em>to retrieve this info if you want to change it</em></label>' . '</td>';
@@ -47,6 +51,7 @@ function attendeeForm( $page, $is_new=false ) {
     . '</td>';
   $res .= '</tr>';
 
+  /////// NAME
 
   $val = $is_new ? '' : ' value="' .$page->title. '"';
 
@@ -55,38 +60,98 @@ function attendeeForm( $page, $is_new=false ) {
   $res .= '<td colspan="3">' . '<input type="text" name="title" id="title" size="40"'.$val.' />' . '</td>';
   $res .= '</tr>';
 
+  $res .= '</table>';
+
+  $res .= '<br><p class="well">Click the <span class="slct"><i>ALL</i> arrows</span> below to set or clear all related check boxes at once.</p>';
+
+  $res .= '<table class="table-striped">';
+
+  //////// AMENITIES
+
+  $amenities = wire('pages')->find('parent=/lookups/amenities, template.name=amenity, closed=0, sort=sort');
+
+  $res .= '<tr>';
+  $res .= '<td></td>';
+  $res .= '<td></td>';
+  foreach($amenities as $a) {
+    $res .= '<th class="text-right">' . $a->title . '</th>';
+  }
+  $res .= '</tr>';
+
+  /////// CHILD OR NOT, WITH PRICE ROWS
+
   $val_a = $is_new ? 'checked ' : ($page->is_child ? '' : 'checked ');
   $val_c = $is_new ? '' : (!$page->is_child ? '' : 'checked ');
 
   $res .= '<tr>';
-  $res .= '<td colspan="2">' . '<label>Is s/he a child?</label>' . '</td>';
-  $res .= '<td class="text-right">' . '<label><input type="radio" name="is_child" value="0" '.$val_a.'/> No</label>' . '</td>';
-  $res .= '<td class="text-right">' . '<label><input type="radio" name="is_child" value="1" '.$val_c.'/> Yes</label>' . '</td>';
-  $res .= '</tr>';
-
-  foreach(wire('pages')->find('template.name=amenity, sort=sort') as $a) {
-
-    $val = $is_new ? '' : ($page->attendee_amenities->get( $a) ? 'checked ' : '');
-    
-    $res .= '<tr>';
-    $res .= '<td>' . '<label for="' . $a->name . '">' . $a->title . '</label>' . '</td>';
-    $res .= '<td>' . '<input type="checkbox" id="'.$a->name.'" name="'.$a->name.'" '.$val.'/>' . '</td>';
-    $res .= '<td class="text-right">' . '<span class="price adult" price="'.$a->price_adult.'">' . currency( $a->price_adult, '--') .'</span>' . '</td>';
-    $res .= '<td class="text-right">' . '<span class="price child" price="'.$a->price_child.'">' . currency( $a->price_child, '--') .'</span>' . '</td>';
-    $res .= '</tr>';
+  $res .= '<td>' . '<label for="is_child_a">Adult</label>' . '</td>';
+  $res .= '<td class="text-right">' . '<input type="radio" id="is_child_a" name="is_child" value="0" '.$val_a.'/>' . '</td>';
+  foreach($amenities as $a) {
+    $res .= '<td class="text-right">' . '<span class="price adult" amenity="'.$a->name.'" price="'.$a->price_adult.'">' . currency( $a->price_adult, '--') .'</span>' . '</td>';
   }
+  $res .= '</tr>';
 
   $res .= '<tr>';
-  $res .= '<td colspan="2">' . '<label>Total</label>' . '</td>';
-  $res .= '<td class="text-right">' . '<span class="price adult total">--</span>' . '</td>';
-  $res .= '<td class="text-right">' . '<span class="price child total">--</span>' . '</td>';
+  $res .= '<td>' . '<label for="is_child_c">Child</label>' . '</td>';
+  $res .= '<td class="text-right">' . '<input type="radio" id="is_child_c" name="is_child" value="1" '.$val_c.'/>' . '</td>';  
+  foreach($amenities as $a) {
+    $res .= '<td class="text-right">' . '<span class="price child" amenity="'.$a->name.'" price="'.$a->price_child.'">' . currency( $a->price_child, '--') .'</span>' . '</td>';
+  }
   $res .= '</tr>';
 
-  $res .= '</table>';
-  $res .= '<div class="bg-danger" id="err"></div>';
-  $res .= '<div><button id="btn-save" class="btn btn-success">'.($is_new ? 'Register' : 'Save').'</div>';
-  $res .= '</form>';
+  //////// ALL selectors
 
+  $res .= '<tr>';
+  $res .= '<td></td>';
+  $res .= '<td>' . '<label class="slct"><i>ALL</i></label>' . '</td>';
+  foreach($amenities as $a) {
+    $res .= '<td class="text-right">' . '<a href="#" class="slct amenity" amenity="' .$a->name. '" >&#8659;</a>'. '</td>';
+  }
+  $res .= '</tr>';
+
+  //////// EVENT AMENITIES PER DAY
+
+  $d0 = new DateTime();
+  $d0->setTimestamp( $event->getUnformatted( "date_from"));
+  $d_from = $d0->format("Y-m-d");
+  $d9 = new DateTime();
+  $d9->setTimestamp( $event->getUnformatted( "date_to"));
+  $d_to = $d9->format("Y-m-d");
+
+  $event_amenities = $event->child('template=amenities');
+
+  while($d_from <= $d_to){
+    $res .= '<tr>';
+    $res .= '<td>' .  '<label>' . $d0->format('D, M d') . '</label>' . '</td>';
+    $res .= '<td class="text-right">' . '<a href="#" class="slct date" >&#8658;</a>'. '</td>';
+    foreach($amenities as $a) {
+      $name = wire('sanitizer')->name($d_from . '-' . $a->name);
+      $e_a = $event_amenities->child( "name=$name");
+      if (!$e_a->id) {
+        $res .= "<td>$name</td>";
+      } else {
+        $val = $is_new ? '' : ($page->attendee_amenities->get( $e_a) ? 'checked ' : '');
+        $res .= '<td class="text-right">' . '<input type="checkbox" amenity="' .$a->name. '" id="'.$e_a->name.'" name="'.$e_a->name.'" '.$val.'/>' . '</td>';
+      }
+    }
+    $res .= '</tr>';
+    $d0->modify('+1 day');
+    $d_from = $d0->format("Y-m-d");
+  }
+
+  $btn_label = ($is_new ? 'Register' : 'Save');
+
+  $res .= <<<END
+</table>
+<div class="bg-default"></div>
+<div class="bg-danger" id="err"></div>
+<br/>
+<div>
+  <h4 class="pull-left">Total: &nbsp; <span id="total">--</span></h4>
+  <button id="btn-save" class="btn btn-success pull-right">{$btn_label}</button>
+</div>
+</form>
+END;
 
   $res .= <<<END
 <script>
@@ -123,20 +188,52 @@ $('#btn-save').click(function(ev) {
   return missing.length===0 ;
 });
 
+$('.slct.amenity').click(function(ev) {
+  ev.preventDefault();
+  var state = true;
+  $('#attendee input[type=checkbox][amenity='+$(this).attr('amenity')+']')
+  .each(function() {
+    state &= this.checked;
+  })
+  .each(function() {
+    this.checked = !state;
+  });
+  updateTotals();
+});
+
+$('.slct.date').click(function(ev) {
+  ev.preventDefault();
+  var state = true;
+  $(this).parents('tr').find('input[type=checkbox]')
+  .each(function() {
+    state &= this.checked;
+  })
+  .each(function() {
+    this.checked = !state;
+  });
+  updateTotals();
+});
+
+
 function updateTotals() {
   var isChild = $('#attendee').hasClass('child'), 
   c = '.price.' + (isChild ? 'child' : 'adult');
-  var total = 0;
   console.log('C', c);
+  // find prices once
+  prices = {};
+  $('#attendee ' + c).each(function() {
+    prices[ $(this).attr('amenity')] = $(this).attr('price');    
+  });
+  console.log('PRICES', prices);
+  var total = 0;
   $('#attendee input[type=checkbox]').each(function() {
     if (this.checked) {
-      n = $(this).parents('tr').find( c).attr('price'); 
+      n = prices[ $(this).attr('amenity') ];
       console.log( this.name, n);
       total += parseFloat(n);
     }
   });
-  $('#attendee .price.adult.total').html(isChild ? '--' : '$' + total.toFixed(2));
-  $('#attendee .price.child.total').html(isChild ? '$' + total.toFixed(2) : '--');
+  $('#total').html('$' + total.toFixed(2));
 }
 
 updateTotals();
@@ -155,23 +252,24 @@ function attendeeSave($page, $input, $is_new) {
     $p->template = 'attendee';
     $p->parent = $page;   
   }
+  trace( 'SAVE name: ' . $p->name );
   $p->of(false);
   $p->title = $sanitizer->text( $input->post->title );
   $p->email = $sanitizer->email( $input->post->email );
   $p->is_child = $input->post->is_child ? true : false;
 
-  foreach(wire('pages')->find('template.name=amenity, sort=sort') as $a) {
-    // trace( $a->name . ' : ' . $input->post( $a->name ));
+  foreach($p->parent('template.name=event')->find('template.name=event_amenity') as $a) {
     if ($input->post( $a->name )) {
       $p->attendee_amenities = $a;
+      trace( 'add: ' . $a->name . ' : ' . $input->post( $a->name ));
     } elseif($p->attendee_amenities->get($a)) { 
       $p->attendee_amenities->remove($a);
+      trace( 'remove: ' . $a->name . ' : ' . $input->post( $a->name ));
     }
   } 
   
-  // trace( 'name: ' . $p->name );
-  // trace( 'title: ' . $p->title );
-
+  trace( 'title: ' . $p->title );
+  trace( 'ARG!: ' . $p->attendee_amenities);
   $p->save();
   return $p;
 }
@@ -196,13 +294,12 @@ function trace($s) {
 }
 function trace_show() {
   global $trace_lines;
-  if (count($trace_lines)) {
-    echo '<pre class="trace">';
-    foreach($trace_lines as $line) {
-      echo "$line\n";
-    }
-    echo '</pre>';
+  echo '<pre class="trace">';
+  echo "TRACE:\n";
+  foreach($trace_lines as $line) {
+    echo "$line\n";
   }
+  echo '</pre>';
 }
 
 function _table($rows, $config) {

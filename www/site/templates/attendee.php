@@ -9,7 +9,9 @@ if ($input->post->delete) {
 }
 
 if ($input->urlSegment1 === 'save') {
+	trace('attendee page');
 	attendeeSave( $page, $input);
+	// redirect in order to lose the "save" segment
 	$session->redirect($page->url, false);
 }
 $content = <<<EOT

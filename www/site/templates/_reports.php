@@ -21,12 +21,13 @@ function _group_total( $cats, $cur_email, $cur_email_tot) {
 }
 
 function report_charges() {
+  // establish where we at
+  $event_attendees = wire('page');
 
-  // grab all amenities upfront 
-  $amenities = wire('pages')->find('template.name=amenity, sort=title');
+  // define categories
   $gtot = array();
   $cats = array();
-  foreach($amenities as $a) {
+  foreach(wire('pages')->find('template.name=amenity, closed=0') as $a) {
     $cat = $a->category->title;
     if (!in_array($cat, $cats)) {
       $cats[] = $cat;   
@@ -60,7 +61,7 @@ function report_charges() {
 
   $blank = '';
   $blank_row = array_fill(0, count($r), _td(''));
-  foreach(wire('page')->children('sort=email, sort=title') as $p) {
+  foreach($event_attendees->children('sort=email, sort=title') as $p) {
     // show group total?
     if ($cur_email!=='' && $cur_email!==$p->email) {
       if ($cur_email_n>1) {
@@ -80,20 +81,19 @@ function report_charges() {
       $tot[$cat] = 0;
     }
     $fld = $p->is_child ? 'price_child' : 'price_adult';
-    foreach($amenities as $a) {
-      if ($p->attendee_amenities->find($a)->count()) {
-        $cat = $a->category->title;
-        $n = $a->get($fld);
-        // attendee totals
-        $tot[ $cat] = $tot[ $cat] + $n;
-        $tot[ TOT] = $tot[ TOT] + $n; 
-        // grand totals
-        $gtot[ $cat] = $gtot[ $cat] + $n;
-        $gtot[ TOT] = $gtot[ TOT] + $n; 
-        // email totals
-        $cur_email_tot[ $cat] = $cur_email_tot[ $cat] + $n;
-        $cur_email_tot[ TOT] = $cur_email_tot[ TOT] + $n; 
-      }
+    foreach($p->attendee_amenities as $a) {
+      $cat = $a->amenity->category->title;
+      $n = $a->amenity->get($fld);
+      // attendee totals
+      // trace($a->title . ': ' . $cat . ': '. $n);
+      $tot[ $cat] = $tot[ $cat] + $n;
+      $tot[ TOT] = $tot[ TOT] + $n; 
+      // grand totals
+      $gtot[ $cat] = $gtot[ $cat] + $n;
+      $gtot[ TOT] = $gtot[ TOT] + $n; 
+      // email totals
+      $cur_email_tot[ $cat] = $cur_email_tot[ $cat] + $n;
+      $cur_email_tot[ TOT] = $cur_email_tot[ TOT] + $n; 
     }
     $t = 0;
 
@@ -125,13 +125,17 @@ function report_charges() {
 
 function report_meals() {
 
-  // grab all amenities upfront 
-  $amenities = wire('pages')->find('template.name=amenity, sort=title');
+  // establish where we at.
+  $event_attendees = wire('page');
+  $event = $event_attendees->parent;
+
+  // grab all event amenities upfront 
+  $event_amenities = $event->find('template.name=event_amenity, sort=sort');
   $tot_a = array();
   $tot_c = array();
   $cats = array();
-  foreach($amenities as $a) {
-    if ($a->category->title === 'Food') {
+  foreach($event_amenities as $a) {
+    if ($a->amenity->category->title === 'Food') {
       $cats[] = $a->title;   
     }
   }
@@ -156,8 +160,8 @@ function report_meals() {
   $r[] = _td( 'Children', 'class="text-right b"');
   $rows[] = $r;
   
-  foreach(wire('page')->children('sort=email') as $p) {
-    foreach($amenities as $a) {
+  foreach($event_attendees->children('sort=email') as $p) {
+    foreach($event_amenities as $a) {
       if ($p->attendee_amenities->find($a)->count()) {
         if ($p->is_child) {
           $tot_c[$a->title] += 1;

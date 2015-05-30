@@ -10,23 +10,28 @@ if ($page->closed) {
 	$content .= "<div class=\"well\">What's done is done! Nothing to change here.</div>";
 } else {
 	// $add_url = $page->url. 'attendees/add';
-	$content .= "<h3>Not already registered</h3>";
-	$content .= "<div>";
-	$content .= "<a class=\"btn btn-primary\" href=\"attendees/add\">Add yourself or someone else to attend this event</a>";
-	$content .= "</div>";
-	$content .= "<h3>Already registered</h3>";
-	$content .= "<div>";
-	$content .= '<form action="attendees/search">';
-	$content .= '<label>Enter some text found in the email address you used when you registered  <input type="text" name="email"></label> ';
-	$content .= '<button class="btn btn-warning">Search</button> ';
-	$content .= "</form>";
-	$content .= "</div>";
+	$content .= <<<END
+<h3>Not already registered</h3>
+<div class="generous">
+	<a class="btn btn-primary" href="attendees/add">Add yourself or someone else to attend this event</a>
+</div>
+<h3>Already registered</h3>
+<div class="generous">
+	<form action="attendees/search">
+		<label>Enter some text found in the email address you used when you registered  <input type="text" name="email"></label>
+		<button class="btn btn-warning">Search</button>
+	</form>
+</div>
+END;
+
 }
 
-if ($user->isLoggedin()) {
-	$content .= '<div>';
-	$content .= '<a class="btn btn-primary" href="attendees/reports">Attendees reports</a>';
-	$content .= '</div>';
+if ($user->isLoggedin() && !$page->closed) {
+	$content .= <<<END
+<div class="generous">
+	<a class="btn btn-primary" href="attendees/reports">Attendees reports</a>
+</div>
+END;
 }
 
 // If the page has children, then render navigation to them under the body.

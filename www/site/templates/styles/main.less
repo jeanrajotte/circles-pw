@@ -25,13 +25,10 @@ body {
 }
 
 body,
-td,
+table,
 input[type=text],
 textarea {
-  /*font-family: 'Quattrocento', serif;
-  font-size: 105%; 
-  line-height: 1.8em;*/
-  
+  // font-size: 115%;
   color: #444;
 }
 
@@ -277,10 +274,17 @@ figure figcaption {
 @media only screen and (max-width: 767px) {
   /* mobile layout */
   
-  body,
-  td,
-  textarea {
-    font-size: 100%;
+  h1 {
+    font-size: 130%;
+  }
+  h2 {
+    font-size: 120%;
+  }
+  h3 {
+    font-size: 115%;
+  }
+  h4 {
+    font-size: 110%;
   }
   body.has-sidebar #content,
   body.has-sidebar #sidebar {
@@ -306,16 +310,6 @@ figure figcaption {
     float: none;
     margin: 1em auto;
     max-width: 100%;
-  }
-}
-
-@media only screen and (min-width: 1200px) {
-  /* extra-wide desktop layout */
-  
-  body,
-  td,
-  textarea {
-    font-size: 115%;
   }
 }
 /**********************************
@@ -346,9 +340,20 @@ table.circles th,
   background-color: #ccc;
 }
 
+#attendee th {
+  padding-left: 12px;
+}
+
 .price {
   display: inline-block;
   width: 5em;
+}
+
+.slct {
+  font-weight: bold;
+  text-decoration: none;
+  font-size: 120%;
+  color: blue;
 }
 
 label {
@@ -385,6 +390,7 @@ form.child .child {
 }
 
 .generous {
+  margin-top: 12px;
   padding: 12px;
 }
 
@@ -406,7 +412,7 @@ a {
     text-decoration: none;
     &:hover {
       color: white;
-    } 
+    }
   }
 }
 
