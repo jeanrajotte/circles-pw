@@ -107,6 +107,9 @@ class Circles extends WireData implements Module {
 		if ($p->template->name !== 'event') {
 			return;
 		}
+		if (!$p->date_from) {
+			return;
+		}
 		$d0 = new DateTime();
 		$d0->setTimestamp( $p->getUnformatted( "date_from"));
 		$d_from = $d0->format("Y-m-d");

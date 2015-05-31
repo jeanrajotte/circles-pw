@@ -26,7 +26,7 @@ END;
 
 }
 
-if ($user->isLoggedin() && !$page->closed) {
+if (!$page->closed) {
 	$content .= <<<END
 <div class="generous">
 	<a class="btn btn-primary" href="attendees/reports">Attendees reports</a>

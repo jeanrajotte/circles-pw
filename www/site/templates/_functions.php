@@ -284,7 +284,7 @@ function renderNextEvent() {
   $d = new Datetime();
   $d->modify('- 3 days');
   $s = $d->format('Y-m-d');
-  trace($s);
+  // trace($s);
   $p = wire('pages')->findOne("template.name=event,date_from>$s,sort=date_from");
   if ($p) {
     return '<a class="btn btn-primary" href="'.$p->url.'">' .$p->title. '</a>';

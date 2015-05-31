@@ -4,7 +4,13 @@
 /////////// reports /////////////
 
 function reports() {
-  return report_charges() . report_meals() . report_on_site();
+  $res = '';
+  // don't show financials unless logged in
+  if (wire('user')->isLoggedin()) {
+    $res .= report_charges();
+  }
+  $res .= report_meals() . report_on_site();
+  return $res;
 } 
 
 
