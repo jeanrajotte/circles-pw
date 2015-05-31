@@ -4,7 +4,7 @@
 /////////// reports /////////////
 
 function reports() {
-  return report_charges() . report_meals();
+  return report_charges() . report_meals() . report_on_site();
 } 
 
 
@@ -123,7 +123,7 @@ function report_charges() {
 
 }
 
-function report_meals() {
+function _report_head_count( $cat ) {
 
   // establish where we at.
   $event_attendees = wire('page');
@@ -131,20 +131,24 @@ function report_meals() {
 
   // grab all event amenities upfront 
   $event_amenities = $event->find('template.name=event_amenity, sort=sort');
-  $tot_a = array();
-  $tot_c = array();
-  $cats = array();
-  foreach($event_amenities as $a) {
-    if ($a->amenity->category->title === 'Food') {
-      $cats[] = $a->title;   
+  $tots_a = array();
+  $tots_c = array();
+  $cols = array();
+  foreach($event_amenities as $e_a) {
+    if ($e_a->amenity->category->title === $cat) {
+      $ts = $e_a->getUnformatted( "date");
+      // trace($ts);
+      $col = $e_a->amenity->title;
+      if (!array_key_exists($ts, $tot_a)) {
+        $tot_a[$ts] = array();
+      }
+      $tot_a[$ts][$col] = 0;
+      $tot_c[$ts][$col] = 0;
+      $cols[$col] = true;
     }
   }
-  $cats[] = TOT;
-
-  foreach($cats as $cat) {
-    $tot_a[ $cat] = 0;
-    $tot_c[ $cat] = 0;
-  }
+  
+  // trace( print_r($tot_a, true));
 
   $config = array(
     'tbl_atts' => 'class="circles table-striped"',
@@ -154,41 +158,60 @@ function report_meals() {
 
   $rows = array();
   $r = array();
-  $r[] = _td( 'Meals');
-  $r[] = _td( 'Total', 'class="text-right b"');
-  $r[] = _td( 'Adults', 'class="text-right b"');
-  $r[] = _td( 'Children', 'class="text-right b"');
+  $r[] = _td( $cat, 'style="border-right:1px silver solid"');
+  foreach($cols as $name => $dummy) {
+    $r[] = _td( $name, 'colspan="2" class="text-center b"  style="border-right:1px silver solid"');
+  }
+  $rows[] = $r;
+
+  $r = array();
+  $r[] = _td( '', 'style="border-right:1px silver solid"');
+  foreach($cols as $name => $dummy) {
+    $r[] = _td( 'Adults', 'class="text-right"');
+    $r[] = _td( 'Children', 'class="text-right" style="border-right:1px silver solid"');
+  }
   $rows[] = $r;
   
-  foreach($event_attendees->children('sort=email') as $p) {
-    foreach($event_amenities as $a) {
-      if ($p->attendee_amenities->find($a)->count()) {
+  // trace( $event_attendees->children()->count() );
+  foreach($event_attendees->children() as $p) {
+    // trace($p->email);
+    foreach($p->attendee_amenities as $e_a) {
+      // trace('   ' . $e_a->title);
+      if ($e_a->amenity->category->title === $cat) {
+        $ts = $e_a->getUnformatted( "date");
+        $col = $e_a->amenity->title;
         if ($p->is_child) {
-          $tot_c[$a->title] += 1;
+          $tot_c[$ts][$col] += 1;
         } else {
-          $tot_a[$a->title] += 1;
+          $tot_a[$ts][$col] += 1;
         }
       }
     }
   }
 
-  foreach($cats as $cat) {
-    if ($cat!==TOT) {
-      $tot_a[TOT] += $tot_a[ $cat];
-      $tot_c[TOT] += $tot_c[ $cat];
-    }  
-  }  
-  foreach($cats as $cat) {
+  // trace( print_r($tot_a, true));
+
+  $d = new Datetime();
+  foreach($tot_a as $ts => $dummy) {
     $r = array();
-    $c = $cat === TOT ? 'class="text-right b tot"' : 'class="text-right"';
-    $c_t = $cat === TOT ? 'class="text-right b tot"' : 'class="text-right b"';
-    $r[] = _td( $cat);
-    $r[] = _td( $tot_a[ $cat] + $tot_c[ $cat], $c_t);
-    $r[] = _td( $tot_a[ $cat], $c);
-    $r[] = _td( $tot_c[ $cat], $c);
+    $d->setTimestamp( $ts);
+    $r[] = _td( $d->format('D, M d'), 'class="b" style="border-right:1px silver solid"');
+    foreach($cols as $col => $dummy) {
+      $r[] = _td( $tot_a[$ts][$col], 'class="text-right"');
+      $r[] = _td( $tot_c[$ts][$col], 'class="text-right" style="border-right:1px silver solid"');
+    }
     $rows[] = $r;
   } 
-
-  return "<h2>Meal Counts</h2>" . _table( $rows, $config);
+  return _table( $rows, $config);
 }
+
+function report_meals() {
+  return '<h2>Meal Counts</h2>' . _report_head_count( 'Food') ;
+}
+
+
+function report_on_site() {
+  return '<h2>On-Site Counts</h2>' . _report_head_count( 'Lodging') ;
+}
+
 

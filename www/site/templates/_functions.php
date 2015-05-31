@@ -19,6 +19,9 @@ function attendeeForm( $page, $is_new=false ) {
     $page->of(true);
   }
 
+  define('DOWN_ARR', '&#8659;');
+  define('RIGHT_ARR', '&#8658;');
+
   $event = $page->parent('template.name=event');
 
   // trace($is_new ? 'NEW' : 'NOT NEW');
@@ -29,7 +32,7 @@ function attendeeForm( $page, $is_new=false ) {
   $res .= '<div class="well required">Fields marked like this paragraph are <b>[required]</b>. You will not be able to save this form with values in them.</div>';
 
   $res .= '<form class="tbl '.$c.'" id="attendee" action="'.$url.'" method="post">';
-  $res .= '<table>';
+  $res .= '<table class="circles">';
 
   ///////// EMAIL
 
@@ -62,9 +65,12 @@ function attendeeForm( $page, $is_new=false ) {
 
   $res .= '</table>';
 
-  $res .= '<br><p class="well">Click the <span class="slct"><i>ALL</i> arrows</span> below to set or clear all related check boxes at once.</p>';
+  $res .= '<div class="well generous">';
+  $res .= '<p>Click <span class="slct">' .DOWN_ARR.'</span> below to set/clear all check boxes in the column.</p>';
+  $res .= '<p>Click <span class="slct">' .RIGHT_ARR.'</span> below to set/clear all check boxes in the row.</p>';
+  $res .= '</div>';
 
-  $res .= '<table class="table-striped">';
+  $res .= '<table class="table-striped circles">';
 
   //////// AMENITIES
 
@@ -103,9 +109,9 @@ function attendeeForm( $page, $is_new=false ) {
 
   $res .= '<tr>';
   $res .= '<td></td>';
-  $res .= '<td>' . '<label class="slct"><i>ALL</i></label>' . '</td>';
+  $res .= '<td>' . '<label class="slct">ALL</label>' . '</td>';
   foreach($amenities as $a) {
-    $res .= '<td class="text-right">' . '<a href="#" class="slct amenity" amenity="' .$a->name. '" >&#8659;</a>'. '</td>';
+    $res .= '<td class="text-right">' . '<a href="#" class="slct amenity" amenity="' .$a->name. '" >'.DOWN_ARR.'</a>'. '</td>';
   }
   $res .= '</tr>';
 
@@ -123,7 +129,7 @@ function attendeeForm( $page, $is_new=false ) {
   while($d_from <= $d_to){
     $res .= '<tr>';
     $res .= '<td>' .  '<label>' . $d0->format('D, M d') . '</label>' . '</td>';
-    $res .= '<td class="text-right">' . '<a href="#" class="slct date" >&#8658;</a>'. '</td>';
+    $res .= '<td class="text-right">' . '<a href="#" class="slct date" >'.RIGHT_ARR.'</a>'. '</td>';
     foreach($amenities as $a) {
       $name = wire('sanitizer')->name($d_from . '-' . $a->name);
       $e_a = $event_amenities->child( "name=$name");
@@ -146,7 +152,7 @@ function attendeeForm( $page, $is_new=false ) {
 <div class="bg-default"></div>
 <div class="bg-danger" id="err"></div>
 <br/>
-<div>
+<div class="band">
   <h4 class="pull-left">Total: &nbsp; <span id="total">--</span></h4>
   <button id="btn-save" class="btn btn-success pull-right">{$btn_label}</button>
 </div>
