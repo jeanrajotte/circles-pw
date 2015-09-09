@@ -1,10 +1,18 @@
-<?php 
+<?php
 
-// basic-page.php template file 
+// basic-page.php template file
 // See README.txt for more information
 
 // Primary content is the page's body copy
-$content = $page->body; 
+$content = $page->body;
+
+$ls = array();
+foreach($page->attachments as $f) {
+	$ls[] = "<a href=\"{$f->url}\">{$f->description}</a>";
+}
+if (count($ls)) {
+	$content .= "<h4>Attachments</h4><div>".implode('<br/>',$ls)."</div>";
+}
 
 if ($page->closed) {
 	$content .= "<div class=\"well\">What's done is done! Nothing to change here.</div>";
@@ -40,10 +48,8 @@ END;
 // 	$content .= renderNav($page->children);
 // }
 
-// if the rootParent (section) page has more than 1 child, then render 
+// if the rootParent (section) page has more than 1 child, then render
 // section navigation in the sidebar
 if($page->rootParent->hasChildren > 1) {
-	$sidebar = renderNavTree($page->rootParent, 1) . $page->sidebar; 
+	$sidebar = renderNavTree($page->rootParent, 1) . $page->sidebar;
 }
-
-
